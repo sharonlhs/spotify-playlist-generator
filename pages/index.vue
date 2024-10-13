@@ -113,13 +113,8 @@
 			return;
 		}
 
-		console.log('Starting search for query:', query);
-		console.log('Access token:', accessToken.value ? 'Present' : 'Missing');
-		console.log('User profile:', userProfile.value);
-
 		try {
 			// Search for tracks
-			console.log('Searching for tracks...');
 			const searchResponse = await fetch(
 				`https://api.spotify.com/v1/search?q=${encodeURIComponent(
 					query
@@ -136,10 +131,8 @@
 				);
 			}
 			const searchData = await searchResponse.json();
-			console.log('Search successful, tracks found:', searchData.tracks.items.length);
 
 			// Create a new playlist
-			console.log('Creating playlist...');
 			const createPlaylistResponse = await fetch(
 				`https://api.spotify.com/v1/users/${userProfile.value.id}/playlists`,
 				{
@@ -161,10 +154,8 @@
 				);
 			}
 			const playlistData = await createPlaylistResponse.json();
-			console.log('Playlist created:', playlistData.id);
 
 			// Add tracks to the playlist
-			console.log('Adding tracks to playlist...');
 			const trackUris = searchData.tracks.items.map((track: any) => track.uri);
 			const addTracksResponse = await fetch(
 				`https://api.spotify.com/v1/playlists/${playlistData.id}/tracks`,
@@ -185,7 +176,6 @@
 				);
 			}
 
-			console.log('Tracks added successfully');
 			alert('Playlist created successfully!');
 			// Set the created playlist data
 			createdPlaylist.value = {
@@ -193,7 +183,6 @@
 				tracks: searchData.tracks.items,
 			};
 
-			console.log('Playlist creation complete:', createdPlaylist.value);
 		} catch (error) {
 			console.error('Error creating playlist:', error);
 			alert(`Error creating playlist: ${error.message}`);
@@ -228,7 +217,6 @@
 	};
 
 	const checkAndRefreshToken = async () => {
-		console.log('Checking and refreshing token...');
 		const storedToken = localStorage.getItem('spotify_access_token');
 		const tokenTimestamp = localStorage.getItem('spotify_token_timestamp');
 
@@ -237,25 +225,20 @@
 			const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
 
 			if (now - parseInt(tokenTimestamp) > oneHour) {
-				console.log('Token potentially expired, verifying...');
 				const isValid = await verifyToken(storedToken);
 				if (!isValid) {
-					console.log('Token invalid, redirecting to login...');
 					clearTokenAndRedirect();
 				} else {
-					console.log('Token still valid');
 					accessToken.value = storedToken;
 					isLoggedIn.value = true;
 					await fetchUserProfile();
 				}
 			} else {
-				console.log('Token timestamp within valid range');
 				accessToken.value = storedToken;
 				isLoggedIn.value = true;
 				await fetchUserProfile();
 			}
 		} else {
-			console.log('No token found, user needs to log in');
 			isLoggedIn.value = false;
 		}
 	};
