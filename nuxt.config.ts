@@ -32,6 +32,7 @@ export default defineNuxtConfig({
     public: {
       CLIENT_ID: process.env.SPOTIFY_CLIENT_ID,
       CLIENT_SECRET: process.env.SPOTIFY_CLIENT_SECRET,
+      appUrl: process.env.APP_URL,
     }
   },
   css: ['~/assets/css/main.css'],

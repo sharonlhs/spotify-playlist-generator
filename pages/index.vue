@@ -69,7 +69,7 @@
 
 	const config = useRuntimeConfig();
 	const client_id = config.public.CLIENT_ID;
-	const redirect_uri = 'http://localhost:3000/callback'; // Update this
+  const redirect_uri = `${config.public.appUrl}/callback`;
 	const scope = 'user-read-private user-read-email playlist-modify-public';
 
 	const isLoggedIn = ref(false);

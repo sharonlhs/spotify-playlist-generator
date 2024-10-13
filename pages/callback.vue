@@ -8,7 +8,7 @@ import { onMounted } from 'vue';
 const config = useRuntimeConfig();
 const client_id = config.public.CLIENT_ID;
 const client_secret = config.public.CLIENT_SECRET;
-const redirect_uri = 'http://localhost:3000/callback';
+const redirect_uri = `${config.public.appUrl}/callback`;
 
 onMounted(async () => {
   const urlParams = new URLSearchParams(window.location.search);
