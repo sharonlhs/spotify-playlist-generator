@@ -226,6 +226,58 @@
 			window.location.href = appRedirectUrl;
 		}, 2000);
 	};
+
+	const checkAndRefreshToken = async () => {
+		console.log('Checking and refreshing token...');
+		const storedToken = localStorage.getItem('spotify_access_token');
+		const tokenTimestamp = localStorage.getItem('spotify_token_timestamp');
+
+		if (storedToken && tokenTimestamp) {
+			const now = new Date().getTime();
+			const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
+
+			if (now - parseInt(tokenTimestamp) > oneHour) {
+				console.log('Token potentially expired, verifying...');
+				const isValid = await verifyToken(storedToken);
+				if (!isValid) {
+					console.log('Token invalid, redirecting to login...');
+					clearTokenAndRedirect();
+				} else {
+					console.log('Token still valid');
+					accessToken.value = storedToken;
+					isLoggedIn.value = true;
+					await fetchUserProfile();
+				}
+			} else {
+				console.log('Token timestamp within valid range');
+				accessToken.value = storedToken;
+				isLoggedIn.value = true;
+				await fetchUserProfile();
+			}
+		} else {
+			console.log('No token found, user needs to log in');
+			isLoggedIn.value = false;
+		}
+	};
+
+	const verifyToken = async (token: string) => {
+		try {
+			const response = await fetch('https://api.spotify.com/v1/me', {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+			return response.ok;
+		} catch (error) {
+			console.error('Error verifying token:', error);
+			return false;
+		}
+	};
+
+	const clearTokenAndRedirect = () => {
+		localStorage.removeItem('spotify_access_token');
+		localStorage.removeItem('spotify_token_timestamp');
+	};
 </script>
 
 <style scoped>
