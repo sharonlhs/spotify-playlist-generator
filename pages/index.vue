@@ -69,7 +69,7 @@
 
 	const config = useRuntimeConfig();
 	const client_id = config.public.CLIENT_ID;
-  const redirect_uri = `${config.public.appUrl}/callback`;
+	const redirect_uri = `${config.public.appUrl}/callback`;
 	const scope = 'user-read-private user-read-email playlist-modify-public';
 
 	const isLoggedIn = ref(false);
@@ -113,8 +113,13 @@
 			return;
 		}
 
+		console.log('Starting search for query:', query);
+		console.log('Access token:', accessToken.value ? 'Present' : 'Missing');
+		console.log('User profile:', userProfile.value);
+
 		try {
 			// Search for tracks
+			console.log('Searching for tracks...');
 			const searchResponse = await fetch(
 				`https://api.spotify.com/v1/search?q=${encodeURIComponent(
 					query
@@ -125,9 +130,16 @@
 					},
 				}
 			);
+			if (!searchResponse.ok) {
+				throw new Error(
+					`Search failed: ${searchResponse.status} ${searchResponse.statusText}`
+				);
+			}
 			const searchData = await searchResponse.json();
+			console.log('Search successful, tracks found:', searchData.tracks.items.length);
 
 			// Create a new playlist
+			console.log('Creating playlist...');
 			const createPlaylistResponse = await fetch(
 				`https://api.spotify.com/v1/users/${userProfile.value.id}/playlists`,
 				{
@@ -143,11 +155,18 @@
 					}),
 				}
 			);
+			if (!createPlaylistResponse.ok) {
+				throw new Error(
+					`Create playlist failed: ${createPlaylistResponse.status} ${createPlaylistResponse.statusText}`
+				);
+			}
 			const playlistData = await createPlaylistResponse.json();
+			console.log('Playlist created:', playlistData.id);
 
 			// Add tracks to the playlist
+			console.log('Adding tracks to playlist...');
 			const trackUris = searchData.tracks.items.map((track: any) => track.uri);
-			await fetch(
+			const addTracksResponse = await fetch(
 				`https://api.spotify.com/v1/playlists/${playlistData.id}/tracks`,
 				{
 					method: 'POST',
@@ -160,7 +179,13 @@
 					}),
 				}
 			);
+			if (!addTracksResponse.ok) {
+				throw new Error(
+					`Add tracks failed: ${addTracksResponse.status} ${addTracksResponse.statusText}`
+				);
+			}
 
+			console.log('Tracks added successfully');
 			alert('Playlist created successfully!');
 			// Set the created playlist data
 			createdPlaylist.value = {
@@ -168,10 +193,10 @@
 				tracks: searchData.tracks.items,
 			};
 
-			console.log('Playlist created:', createdPlaylist.value);
+			console.log('Playlist creation complete:', createdPlaylist.value);
 		} catch (error) {
 			console.error('Error creating playlist:', error);
-			alert('Error creating playlist. Please try again.');
+			alert(`Error creating playlist: ${error.message}`);
 		}
 	};
 
