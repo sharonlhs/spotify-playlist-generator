@@ -5,23 +5,23 @@ export default defineNuxtConfig({
     head: {
       script: [
         {
-          src: 'https://cdn.amplitude.com/libs/analytics-browser-2.11.1-min.js.gz',
-          defer: true
-        },
-        {
-          src: 'https://cdn.amplitude.com/libs/plugin-session-replay-browser-1.8.0-min.js.gz',
+          src: 'https://cdn.amplitude.com/script/f81a432b676c5567f9976521ccd7180b.js',
           defer: true
         },
         {
           innerHTML: `
             window.amplitude.add(window.sessionReplay.plugin({sampleRate: 1}));
-            window.amplitude.init('${process.env.AMPLITUDE_API_KEY}', {"autocapture":{"elementInteractions":true}});
+            window.amplitude.init(window.AMPLITUDE_API_KEY, {"fetchRemoteConfig":true,"autocapture":true});
           `,
           type: 'text/javascript'
         }
       ]
     }
   },
+  plugins: [
+    // ... other  ...
+    '~/plugins/speed-insights.client.ts'
+  ],
   components: [
     {
       path: '~/components',
